@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 0;
+      margin: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .content {
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+      padding-bottom: 60px; /* Space for sticky button */
+    }
+    
+    h2 {
+      margin: 0 0 6px 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #000000;
+    }
+    
+    .section {
+      margin-bottom: 10px;
+      padding: 8px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    @media (max-width: 600px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .info-item {
+      margin: 4px 0;
+      font-size: 11px;
+      color: #333;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
+      margin-top: 4px;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #666;
+      display: inline-block;
+      width: 110px;
+    }
+    
+    .status {
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .status-timer {
+      font-size: 10px;
+      color: #666;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .status-content {
+      flex: 1;
+    }
+    
+    .status-undo-button {
+      flex: 0 0 auto;
+      padding: 3px 6px;
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+      min-width: auto;
+      width: auto;
+      line-height: 1.2;
+    }
+    
+    .status-undo-button:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .status-undo-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .status.info {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .status.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .status.warning {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .section-header:hover {
+      opacity: 0.8;
+    }
+    
+    .section-header h2 {
+      margin: 0;
+      flex: 1;
+    }
+    
+    .toggle-icon {
+      font-size: 12px;
+      color: #666;
+      transition: transform 0.2s;
+      margin-left: 8px;
+    }
+    
+    .section.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+    
+    .log-container {
+      max-height: 150px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 10px;
+      margin-top: 6px;
+      display: block;
+    }
+    
+    .section.collapsed .log-container {
+      display: none;
+    }
+    
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px;
+      border-left: 3px solid #e0e0e0;
+      padding-left: 6px;
+    }
+    
+    .log-entry.info {
+      border-left-color: #2196f3;
+    }
+    
+    .log-entry.success {
+      border-left-color: #4caf50;
+    }
+    
+    .log-entry.error {
+      border-left-color: #f44336;
+    }
+    
+    .button-container {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      padding: 10px;
+      border-top: 1px solid #e0e0e0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-section {
+      margin-bottom: 8px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 8px;
+      background: #18a0fb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background: #1592e8;
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #18a0fb;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <h2>PNG 2 SVG Tracer</h2>
+    
+    <div class="grid-container">
+      <div class="section">
+        <h2>Input Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Node Name:</span>
+            <span id="nodeName">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Frame Name:</span>
+            <span id="frameName">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Image Hash:</span>
+            <span id="imageHash">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Image Size:</span>
+            <span id="imageSize">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Dimensions:</span>
+            <span id="dimensions">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Bytes:</span>
+            <span id="bytes">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Color Type:</span>
+            <span id="colorType">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Bit Depth:</span>
+            <span id="bitDepth">-</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Processing</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Edge Pixels:</span>
+            <span id="edgePixels">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Paths Found:</span>
+            <span id="pathsFound">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Original Points:</span>
+            <span id="pathPoints">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Simplified Points:</span>
+            <span id="simplifiedPoints">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Path Density Control</h2>
+    <div class="info-item">
+      <span class="info-label">Target Points:</span>
+      <input type="range" id="densitySlider" min="5" max="50" value="10" step="2" style="width: 200px; margin-left: 10px;">
+      <span id="densityValue" style="margin-left: 10px; font-weight: 600;">10</span>
+    </div>
+      <div style="font-size: 10px; color: #666; margin-top: 4px;">
+        Target number of points in the outline (5-50)
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Stroke Style</h2>
+      <div class="info-item" style="margin-bottom: 8px;">
+        <span class="info-label">Stroke Color:</span>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+          <input type="color" id="strokeColorInput" value="#000000" style="width: 60px; height: 24px; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
+          <select id="strokeColorVariableSelect" style="flex: 1; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;">
+            <option value="">Custom Color</option>
+          </select>
+          <button id="refreshVariablesButton" style="padding: 4px 8px; font-size: 10px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; white-space: nowrap;" title="Refresh variables">Refresh</button>
+        </div>
+      </div>
+      <div class="info-item" style="margin-bottom: 8px;">
+        <span class="info-label">Fill Color:</span>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+          <input type="color" id="fillColorInput" value="#ffffff" style="width: 60px; height: 24px; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
+          <select id="fillColorVariableSelect" style="flex: 1; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;">
+            <option value="">No Fill</option>
+          </select>
+          <label style="font-size: 10px; display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" id="fillEnabledCheckbox" style="margin: 0;"> Enable
+          </label>
+        </div>
+      </div>
+      <div class="info-item" style="margin-bottom: 8px;">
+        <span class="info-label">Stroke Thickness:</span>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+          <input type="range" id="strokeThicknessSlider" min="0.5" max="20" value="2" step="0.5" style="flex: 1;">
+          <span id="strokeThicknessValue" style="font-weight: 600; min-width: 40px;">2px</span>
+        </div>
+      </div>
+      <div class="info-item" style="margin-bottom: 8px;">
+        <span class="info-label">Corner Radius:</span>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+          <input type="range" id="cornerRadiusSlider" min="0" max="50" value="0" step="1" style="flex: 1;">
+          <span id="cornerRadiusValue" style="font-weight: 600; min-width: 50px;">0px</span>
+        </div>
+        <div style="font-size: 10px; color: #666; margin-top: 4px;">
+          Round corners of the traced shape (0-50px)
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Drop Shadow</h2>
+      <div class="info-item" style="margin-bottom: 8px;">
+        <label style="font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+          <input type="checkbox" id="dropShadowEnabledCheckbox" style="margin: 0;"> Enable Drop Shadow
+        </label>
+      </div>
+      <div id="dropShadowControls" style="display: none;">
+        <div class="info-item" style="margin-bottom: 6px;">
+          <span class="info-label">X Offset:</span>
+          <input type="number" id="shadowXInput" value="0" min="-50" max="50" step="1" style="width: 80px; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px; margin-left: 10px;">
+        </div>
+        <div class="info-item" style="margin-bottom: 6px;">
+          <span class="info-label">Y Offset:</span>
+          <input type="number" id="shadowYInput" value="0" min="-50" max="50" step="1" style="width: 80px; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px; margin-left: 10px;">
+        </div>
+        <div class="info-item" style="margin-bottom: 6px;">
+          <span class="info-label">Blur:</span>
+          <input type="number" id="shadowBlurInput" value="0" min="0" max="50" step="1" style="width: 80px; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px; margin-left: 10px;">
+        </div>
+        <div class="info-item" style="margin-bottom: 6px;">
+          <span class="info-label">Opacity:</span>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+            <input type="range" id="shadowOpacitySlider" min="0" max="1" value="1" step="0.01" style="flex: 1;">
+            <span id="shadowOpacityValue" style="font-weight: 600; min-width: 50px;">100%</span>
+          </div>
+        </div>
+        <div class="info-item" style="margin-bottom: 6px;">
+          <span class="info-label">Shadow Color:</span>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+            <input type="color" id="shadowColorInput" value="#000000" style="width: 60px; height: 24px; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
+            <select id="shadowColorVariableSelect" style="flex: 1; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;">
+              <option value="">Custom Color</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section collapsed" id="debugSection">
+      <div class="section-header" onclick="toggleDebugLog()">
+        <h2>Debug Log</h2>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="log-container" id="logContainer"></div>
+    </div>
+  </div>
+  
+  <div class="button-container">
+    <div class="progress-section">
+      <div class="status info" id="status">
+        <span class="status-content">Ready</span>
+        <span class="status-timer" id="statusTimer" style="display: none;"></span>
+        <button id="undoButton" class="status-undo-button" onclick="undoTracing()" style="display: none;">Undo</button>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+    </div>
+    <button id="startButton" onclick="startTracing()">Start Tracing</button>
+  </div>
+  
+  <script>
+    // Communication with plugin code
+    window.onmessage = async (event) => {
+      // Debug: log all messages to see what we're getting
+      console.log('UI received message:', event.data);
+      
+      // Check if message is from plugin
+      if (!event.data || !event.data.pluginMessage) {
+        console.log('Message not from plugin, ignoring');
+        return;
+      }
+      
+      const pluginMsg = event.data.pluginMessage;
+      const type = pluginMsg.type;
+      const data = pluginMsg.data || pluginMsg; // Fallback to entire message if no data property
+      
+      console.log('Processing message type:', type, 'data:', data);
+      
+      switch (type) {
+        case 'decodePNG':
+          // The bytes might be in pluginMsg.bytes or (data && data.bytes) or pluginMsg.data
+          const bytes = pluginMsg.bytes || (data && data.bytes) || pluginMsg.data;
+          // Extract maxDimension from pluginMsg (sent directly, not in data)
+          const maxDimension = pluginMsg.maxDimension || (data && data.maxDimension) || 150;
+          addLog(`Received decodePNG message with ${bytes ? bytes.length.toLocaleString() : 0} bytes`, 'info');
+          if (bytes && Array.isArray(bytes)) {
+            await decodePNGInUI(bytes, maxDimension);
+          } else {
+            addLog(`Error: No bytes received or invalid format. Got: ${typeof bytes}`, 'error');
+            parent.postMessage({
+              pluginMessage: {
+                type: 'pngDecodeError',
+                error: 'No bytes received in message'
+              }
+            }, '*');
+          }
+          break;
+        case 'updateStatus':
+          updateStatus(data.status, data.message, data.timeoutSeconds);
+          break;
+        case 'updateProgress':
+          updateProgress(data.progress);
+          break;
+        case 'updateNodeInfo':
+          updateNodeInfo(data);
+          break;
+        case 'updateInput':
+          updateInput(data);
+          break;
+        case 'updateProcessing':
+          updateProcessing(data);
+          break;
+        case 'addLog':
+          addLog(data.message, data.level);
+          break;
+        case 'setDensity':
+          // Set density from saved value
+          if (data.density !== undefined) {
+            document.getElementById('densitySlider').value = data.density;
+            document.getElementById('densityValue').textContent = parseFloat(data.density).toFixed(0);
+          }
+          break;
+        case 'setColorVariables':
+          // Populate color variable dropdowns
+          if (data.variables) {
+            populateColorVariables(data.variables);
+          }
+          break;
+        case 'setStyleSettings':
+          // Set style settings from saved values
+          if (data.settings) {
+            applyStyleSettings(data.settings);
+          }
+          break;
+        case 'colorVariableResolved':
+          // Handle resolved color variable (for preview purposes)
+          // This could be used for showing a preview, but we'll just store it
+          break;
+        case 'enableUndo':
+          // Enable or disable undo button
+          const undoButton = document.getElementById('undoButton');
+          if (undoButton) {
+            undoButton.disabled = !data.enabled;
+            undoButton.style.display = data.enabled ? 'block' : 'none';
+          }
+          break;
+        case 'complete':
+          updateStatus('success', data.message || 'Tracing complete!');
+          document.getElementById('startButton').disabled = false;
+          break;
+        case 'error':
+          updateStatus('error', data.message || 'An error occurred');
+          document.getElementById('startButton').disabled = false;
+          break;
+      }
+    };
+    
+    // Decode PNG using Canvas API (UI has access to DOM APIs)
+    async function decodePNGInUI(bytesArray, maxDimension = 150) {
+      try {
+        addLog(`Decoding PNG in UI... Received ${bytesArray.length.toLocaleString()} bytes`, 'info');
+        
+        // Convert bytes array back to Uint8Array
+        const bytes = new Uint8Array(bytesArray);
+        
+        // Create blob from bytes
+        const blob = new Blob([bytes], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        
+        addLog('Creating image from blob...', 'info');
+        
+        // Load image
+        const img = new Image();
+        
+        // Add timeout for image loading
+        const imageLoadTimeout = setTimeout(() => {
+          URL.revokeObjectURL(url);
+          parent.postMessage({
+            pluginMessage: {
+              type: 'pngDecodeError',
+              error: 'Image load timeout: Image too large or corrupted. Try a smaller image.'
+            }
+          }, '*');
+          addLog('Image load timeout', 'error');
+        }, 5000); // 5 second timeout for image loading
+        
+        img.onload = async () => {
+          clearTimeout(imageLoadTimeout);
+          try {
+            addLog(`Image loaded: ${img.width} × ${img.height}`, 'info');
+            
+            // Calculate downscaled dimensions if needed
+            const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+            let canvasWidth = img.width;
+            let canvasHeight = img.height;
+            
+            // Check dimensions BEFORE processing - fail early
+            const MAX_PIXELS = 150 * 150; // Max pixels we'll process
+            const totalPixels = canvasWidth * canvasHeight;
+            if (totalPixels > MAX_PIXELS * 2) {
+              // Force downscale more aggressively
+              const aggressiveScale = Math.sqrt(MAX_PIXELS * 2 / totalPixels);
+              canvasWidth = Math.max(1, Math.round(img.width * aggressiveScale));
+              canvasHeight = Math.max(1, Math.round(img.height * aggressiveScale));
+              addLog(`Aggressive downscaling to ${canvasWidth} × ${canvasHeight} (from ${img.width} × ${img.height})`, 'info');
+            } else if (scale < 1) {
+              canvasWidth = Math.max(1, Math.round(img.width * scale));
+              canvasHeight = Math.max(1, Math.round(img.height * scale));
+              addLog(`Downscaling to ${canvasWidth} × ${canvasHeight} (from ${img.width} × ${img.height})`, 'info');
+            }
+            
+            // Final check: if still too large, reject
+            const finalPixels = canvasWidth * canvasHeight;
+            if (finalPixels > MAX_PIXELS * 2) {
+              const errorMsg = `Image too large (${canvasWidth} × ${canvasHeight} = ${finalPixels.toLocaleString()} pixels). Try a smaller image.`;
+              URL.revokeObjectURL(url);
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'pngDecodeError',
+                  error: errorMsg
+                }
+              }, '*');
+              addLog(errorMsg, 'error');
+              return;
+            }
+            
+            // Create canvas to extract pixel data (downscaled if needed)
+            const canvas = document.createElement('canvas');
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw image (Canvas will automatically downscale if canvas is smaller)
+            ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+            
+            addLog('Extracting pixel data...', 'info');
+            
+            // Get ImageData (from downscaled canvas)
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            addLog(`Pixel data extracted: ${imageData.data.length.toLocaleString()} bytes`, 'info');
+            
+            // Check if image data is too large before converting
+            // MAX_ARRAY_SIZE in bytes (RGBA = 4 bytes per pixel)
+            const MAX_ARRAY_SIZE = 900000; // ~225KB array (150x150x4) - much smaller to prevent freezing
+            if (imageData.data.length > MAX_ARRAY_SIZE) {
+              const errorMsg = `Image too large (${(imageData.data.length / 1024).toFixed(1)}KB). Maximum allowed: ${(MAX_ARRAY_SIZE / 1024).toFixed(1)}KB. Try a smaller image.`;
+              URL.revokeObjectURL(url);
+              parent.postMessage({
+                pluginMessage: {
+                  type: 'pngDecodeError',
+                  error: errorMsg
+                }
+              }, '*');
+              addLog(errorMsg, 'error');
+              return;
+            }
+            
+            addLog('Converting to array and sending back...', 'info');
+            
+            // Convert to array in chunks to prevent UI freeze
+            // Use chunked processing with requestAnimationFrame to keep UI responsive
+            const chunkSize = 50000; // Process 50k elements at a time
+            const totalLength = imageData.data.length;
+            const pixelArray = new Array(totalLength);
+            
+            let offset = 0;
+            const startTime = Date.now();
+            const CONVERSION_TIMEOUT = 2000; // 2 second max - fail fast
+            
+            const processChunk = () => {
+              // Check timeout
+              if (Date.now() - startTime > CONVERSION_TIMEOUT) {
+                const errorMsg = 'Array conversion timeout: Image too large. Try a smaller image.';
+                URL.revokeObjectURL(url);
+                parent.postMessage({
+                  pluginMessage: {
+                    type: 'pngDecodeError',
+                    error: errorMsg
+                  }
+                }, '*');
+                addLog(errorMsg, 'error');
+                return;
+              }
+              
+              const end = Math.min(offset + chunkSize, totalLength);
+              for (let i = offset; i < end; i++) {
+                pixelArray[i] = imageData.data[i];
+              }
+              offset = end;
+              
+              if (offset < totalLength) {
+                // Use requestAnimationFrame to keep UI responsive
+                requestAnimationFrame(processChunk);
+              } else {
+                // Conversion complete - send data
+                addLog('Sending decoded data to plugin...', 'info');
+                
+                parent.postMessage({
+                  pluginMessage: {
+                    type: 'pngDecoded',
+                    data: {
+                      data: pixelArray,
+                      width: imageData.width,
+                      height: imageData.height,
+                      originalWidth: img.width,
+                      originalHeight: img.height
+                    }
+                  }
+                }, '*');
+                
+                URL.revokeObjectURL(url);
+                addLog(`Decoded PNG: ${imageData.width} × ${imageData.height}`, 'success');
+              }
+            };
+            
+            // Start chunked processing
+            requestAnimationFrame(processChunk);
+          } catch (error) {
+            URL.revokeObjectURL(url);
+            parent.postMessage({
+              pluginMessage: {
+                type: 'pngDecodeError',
+                error: error.message
+              }
+            }, '*');
+            addLog(`Error processing image: ${error.message}`, 'error');
+          }
+        };
+        
+        img.onerror = (error) => {
+          clearTimeout(imageLoadTimeout);
+          URL.revokeObjectURL(url);
+          parent.postMessage({
+            pluginMessage: {
+              type: 'pngDecodeError',
+              error: 'Failed to decode PNG image: Image may be corrupted or too large'
+            }
+          }, '*');
+          addLog('Failed to decode PNG image', 'error');
+        };
+        
+        img.src = url;
+      } catch (error) {
+        parent.postMessage({
+          pluginMessage: {
+            type: 'pngDecodeError',
+            error: error.message
+          }
+        }, '*');
+        addLog(`PNG decode error: ${error.message}`, 'error');
+      }
+    }
+    
+    // Timer management
+    let statusTimerInterval = null;
+    
+    function startStatusTimer(timeoutSeconds, onTimeout) {
+      // Clear any existing timer
+      if (statusTimerInterval) {
+        clearInterval(statusTimerInterval);
+      }
+      
+      const timerEl = document.getElementById('statusTimer');
+      if (!timerEl) return;
+      
+      let remaining = timeoutSeconds;
+      timerEl.style.display = 'block';
+      timerEl.textContent = `${remaining}s`;
+      
+      statusTimerInterval = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+          timerEl.textContent = `${remaining}s`;
+        } else {
+          timerEl.textContent = '0s';
+          clearInterval(statusTimerInterval);
+          statusTimerInterval = null;
+          if (onTimeout) onTimeout();
+        }
+      }, 1000);
+    }
+    
+    function stopStatusTimer() {
+      if (statusTimerInterval) {
+        clearInterval(statusTimerInterval);
+        statusTimerInterval = null;
+      }
+      const timerEl = document.getElementById('statusTimer');
+      if (timerEl) {
+        timerEl.style.display = 'none';
+      }
+    }
+    
+    function updateStatus(level, message, timeoutSeconds = null) {
+      const statusEl = document.getElementById('status');
+      const statusContent = statusEl.querySelector('.status-content');
+      const undoButton = document.getElementById('undoButton');
+      
+      statusEl.className = `status ${level}`;
+      
+      if (statusContent) {
+        statusContent.textContent = message;
+      } else {
+        // Fallback if status-content doesn't exist
+        statusEl.textContent = message;
+      }
+      
+      // Show undo button only on success
+      if (undoButton) {
+        undoButton.style.display = (level === 'success') ? 'block' : 'none';
+      }
+      
+      // Start timer if provided
+      if (timeoutSeconds && timeoutSeconds > 0) {
+        startStatusTimer(timeoutSeconds, () => {
+          // Timer expired - but don't auto-fail, just show timeout
+        });
+      } else {
+        stopStatusTimer();
+      }
+    }
+    
+    function updateProgress(progress) {
+      const progressEl = document.getElementById('progress');
+      progressEl.style.width = `${progress}%`;
+    }
+    
+    function updateNodeInfo(data) {
+      if (data.nodeName) document.getElementById('nodeName').textContent = data.nodeName;
+      if (data.frameName) document.getElementById('frameName').textContent = data.frameName;
+    }
+    
+    function updateInput(data) {
+      if (data.nodeName) document.getElementById('nodeName').textContent = data.nodeName;
+      if (data.frameName) document.getElementById('frameName').textContent = data.frameName;
+      if (data.imageHash) document.getElementById('imageHash').textContent = data.imageHash.substring(0, 20) + '...';
+      if (data.imageSize) document.getElementById('imageSize').textContent = data.imageSize;
+      if (data.dimensions) document.getElementById('dimensions').textContent = data.dimensions;
+      if (data.bytes) document.getElementById('bytes').textContent = data.bytes.toLocaleString() + ' bytes';
+      if (data.colorType) document.getElementById('colorType').textContent = data.colorType;
+      if (data.bitDepth) document.getElementById('bitDepth').textContent = data.bitDepth;
+    }
+    
+    function updateProcessing(data) {
+      if (data.edgePixels !== undefined) document.getElementById('edgePixels').textContent = data.edgePixels.toLocaleString();
+      if (data.pathsFound !== undefined) document.getElementById('pathsFound').textContent = data.pathsFound;
+      if (data.pathPoints !== undefined) document.getElementById('pathPoints').textContent = data.pathPoints.toLocaleString();
+      if (data.simplifiedPoints !== undefined) document.getElementById('simplifiedPoints').textContent = data.simplifiedPoints.toLocaleString();
+    }
+    
+    function addLog(message, level = 'info') {
+      const logContainer = document.getElementById('logContainer');
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry ${level}`;
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    function startTracing() {
+      document.getElementById('startButton').disabled = true;
+      // Hide undo button while tracing
+      const undoButton = document.getElementById('undoButton');
+      if (undoButton) {
+        undoButton.style.display = 'none';
+        undoButton.disabled = true;
+      }
+      updateStatus('info', 'Starting...');
+      updateProgress(0);
+      
+      // Get density value from slider
+      const density = parseFloat(document.getElementById('densitySlider').value);
+      
+      // Get style settings
+      const styleSettings = collectStyleSettings();
+      
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'startTracing',
+          density: density,
+          styleSettings: styleSettings
+        } 
+      }, '*');
+    }
+    
+    // Update density value display and save when changed
+    document.getElementById('densitySlider').addEventListener('input', (e) => {
+      const density = parseFloat(e.target.value);
+      document.getElementById('densityValue').textContent = density.toFixed(0);
+      // Save the density setting when user changes it
+      parent.postMessage({
+        pluginMessage: {
+          type: 'updateDensity',
+          density: density
+        }
+      }, '*');
+    });
+    
+    // Toggle debug log visibility
+    function toggleDebugLog() {
+      const section = document.getElementById('debugSection');
+      section.classList.toggle('collapsed');
+    }
+    
+    // Undo last tracing operation
+    function undoTracing() {
+      const undoButton = document.getElementById('undoButton');
+      if (undoButton) {
+        undoButton.disabled = true;
+      }
+      parent.postMessage({
+        pluginMessage: {
+          type: 'undo'
+        }
+      }, '*');
+    }
+    
+    // Helper function to reset status to Ready
+    function resetStatusToReady() {
+      const statusEl = document.getElementById('status');
+      if (!statusEl) return;
+      
+      // Only reset if currently showing success or error
+      const hasErrorOrSuccess = statusEl.classList.contains('success') || statusEl.classList.contains('error');
+      if (!hasErrorOrSuccess) return;
+      
+      // Reset to Ready
+      updateStatus('info', 'Ready');
+      const undoButton = document.getElementById('undoButton');
+      if (undoButton) {
+        undoButton.style.display = 'none';
+        undoButton.disabled = false;
+      }
+    }
+    
+    // Simple click handler - reset status on any click outside the status banner
+    // Use capture phase to catch clicks early
+    document.addEventListener('click', (event) => {
+      const statusEl = document.getElementById('status');
+      if (!statusEl) return;
+      
+      // Only reset if status is success or error
+      const hasErrorOrSuccess = statusEl.classList.contains('success') || statusEl.classList.contains('error');
+      if (!hasErrorOrSuccess) return;
+      
+      // Don't reset if clicking on undo button
+      const undoButton = document.getElementById('undoButton');
+      if (undoButton && (event.target === undoButton || event.target.closest('#undoButton'))) {
+        return;
+      }
+      
+      // Don't reset if clicking inside the status banner
+      if (statusEl.contains(event.target) || event.target.closest('#status') || event.target.closest('.status')) {
+        return;
+      }
+      
+      // Reset to Ready for any other click
+      resetStatusToReady();
+    }, true); // Use capture phase
+    
+    // Explicit handlers for common interactive elements
+    const startButton = document.getElementById('startButton');
+    if (startButton) {
+      startButton.addEventListener('click', resetStatusToReady);
+    }
+    
+    const densitySlider = document.getElementById('densitySlider');
+    if (densitySlider) {
+      densitySlider.addEventListener('mousedown', resetStatusToReady);
+      densitySlider.addEventListener('input', resetStatusToReady);
+    }
+    
+    // Add handlers to all sections after DOM is ready
+    setTimeout(() => {
+      document.querySelectorAll('.section').forEach(section => {
+        section.addEventListener('click', (event) => {
+          // Don't reset if clicking on the debug log header (which is collapsible)
+          if (!event.target.closest('.section-header')) {
+            resetStatusToReady();
+          }
+        });
+      });
+      
+      // Also add to content area
+      const contentArea = document.querySelector('.content');
+      if (contentArea) {
+        contentArea.addEventListener('click', (event) => {
+          if (!event.target.closest('.section-header') && !event.target.closest('#status')) {
+            resetStatusToReady();
+          }
+        });
+      }
+    }, 100);
+    
+    // Make sure click handler is attached after everything is ready
+    setTimeout(() => {
+      // Verify status element exists
+      const statusEl = document.getElementById('status');
+      if (statusEl) {
+        // Add a simple test - click anywhere to reset
+        document.addEventListener('click', (event) => {
+          if (statusEl.classList.contains('error') || statusEl.classList.contains('success')) {
+            // Check if click is NOT on status banner or undo button
+            const undoButton = document.getElementById('undoButton');
+            const clickedStatus = event.target.closest('#status') || event.target.closest('.status');
+            const clickedUndo = undoButton && event.target.closest('#undoButton');
+            
+            if (!clickedStatus && !clickedUndo) {
+              resetStatusToReady();
+            }
+          }
+        }, true);
+      }
+    }, 200);
+    
+    // Populate color variable dropdowns
+    function populateColorVariables(variables) {
+      console.log('Populating color variables:', variables);
+      addLog(`Populating ${variables ? variables.length : 0} color variables`, 'info');
+      
+      const selects = [
+        'strokeColorVariableSelect',
+        'fillColorVariableSelect',
+        'shadowColorVariableSelect'
+      ];
+      
+      selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) {
+          console.log(`Select element ${selectId} not found`);
+          return;
+        }
+        
+        // Keep the first option (Custom Color/No Fill)
+        const firstOption = select.options[0];
+        const currentValue = select.value; // Save current selection
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        
+        // Add variables
+        if (variables && variables.length > 0) {
+          variables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable.id;
+            option.textContent = variable.name;
+            select.appendChild(option);
+          });
+          
+          // Restore previous selection if it still exists
+          if (currentValue) {
+            select.value = currentValue;
+          }
+          
+          addLog(`Added ${variables.length} variables to ${selectId}`, 'info');
+        } else {
+          addLog(`No color variables found for ${selectId}`, 'warning');
+        }
+      });
+    }
+    
+    // Apply saved style settings to UI
+    function applyStyleSettings(settings) {
+      // Stroke color
+      if (settings.strokeColor) {
+        const rgb = settings.strokeColor;
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        document.getElementById('strokeColorInput').value = hex;
+      }
+      if (settings.strokeColorVariableId) {
+        document.getElementById('strokeColorVariableSelect').value = settings.strokeColorVariableId;
+      }
+      
+      // Fill color
+      if (settings.fillColor) {
+        const rgb = settings.fillColor;
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        document.getElementById('fillColorInput').value = hex;
+        document.getElementById('fillEnabledCheckbox').checked = true;
+      } else {
+        document.getElementById('fillEnabledCheckbox').checked = false;
+      }
+      if (settings.fillColorVariableId) {
+        document.getElementById('fillColorVariableSelect').value = settings.fillColorVariableId;
+      }
+      
+      // Stroke thickness
+      if (settings.strokeThickness !== undefined) {
+        document.getElementById('strokeThicknessSlider').value = settings.strokeThickness;
+        document.getElementById('strokeThicknessValue').textContent = settings.strokeThickness + 'px';
+      }
+      
+      // Corner radius
+      if (settings.cornerRadius !== undefined) {
+        document.getElementById('cornerRadiusSlider').value = settings.cornerRadius;
+        document.getElementById('cornerRadiusValue').textContent = settings.cornerRadius + 'px';
+      }
+      
+      // Drop shadow
+      if (settings.dropShadow) {
+        document.getElementById('dropShadowEnabledCheckbox').checked = settings.dropShadow.enabled || false;
+        toggleDropShadowControls(settings.dropShadow.enabled);
+        
+        if (settings.dropShadow.enabled) {
+          document.getElementById('shadowXInput').value = settings.dropShadow.x || 0;
+          document.getElementById('shadowYInput').value = settings.dropShadow.y || 0;
+          document.getElementById('shadowBlurInput').value = settings.dropShadow.blur || 0;
+          
+          const opacity = settings.dropShadow.opacity !== undefined ? settings.dropShadow.opacity : (settings.dropShadow.color && settings.dropShadow.color.a !== undefined ? settings.dropShadow.color.a : 1);
+          document.getElementById('shadowOpacitySlider').value = opacity;
+          document.getElementById('shadowOpacityValue').textContent = Math.round(opacity * 100) + '%';
+          
+          if (settings.dropShadow.color) {
+            const rgb = settings.dropShadow.color;
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            document.getElementById('shadowColorInput').value = hex;
+          }
+          if (settings.dropShadow.colorVariableId) {
+            document.getElementById('shadowColorVariableSelect').value = settings.dropShadow.colorVariableId;
+          }
+        }
+      }
+    }
+    
+    // Convert RGB to hex
+    function rgbToHex(r, g, b) {
+      const toHex = (n) => {
+        const hex = Math.round(n * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+    
+    // Convert hex to RGB
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+      } : null;
+    }
+    
+    // Toggle drop shadow controls visibility
+    function toggleDropShadowControls(enabled) {
+      const controls = document.getElementById('dropShadowControls');
+      if (controls) {
+        controls.style.display = enabled ? 'block' : 'none';
+      }
+    }
+    
+    // Collect style settings from UI
+    function collectStyleSettings() {
+      const strokeColorHex = document.getElementById('strokeColorInput').value;
+      const strokeColorVarId = document.getElementById('strokeColorVariableSelect').value;
+      
+      const fillColorHex = document.getElementById('fillColorInput').value;
+      const fillEnabled = document.getElementById('fillEnabledCheckbox').checked;
+      const fillColorVarId = document.getElementById('fillColorVariableSelect').value;
+      
+      const strokeThickness = parseFloat(document.getElementById('strokeThicknessSlider').value);
+      const cornerRadius = parseFloat(document.getElementById('cornerRadiusSlider').value) || 0;
+      
+      const shadowEnabled = document.getElementById('dropShadowEnabledCheckbox').checked;
+      const shadowX = parseInt(document.getElementById('shadowXInput').value) || 0;
+      const shadowY = parseInt(document.getElementById('shadowYInput').value) || 0;
+      const shadowBlur = parseInt(document.getElementById('shadowBlurInput').value) || 0;
+      const shadowOpacity = parseFloat(document.getElementById('shadowOpacitySlider').value) || 1;
+      const shadowColorHex = document.getElementById('shadowColorInput').value;
+      const shadowColorVarId = document.getElementById('shadowColorVariableSelect').value;
+      
+      const shadowColor = shadowColorVarId ? null : hexToRgb(shadowColorHex);
+      if (shadowColor) {
+        shadowColor.a = shadowOpacity;
+      }
+      
+      return {
+        strokeColor: strokeColorVarId ? null : hexToRgb(strokeColorHex),
+        strokeColorVariableId: strokeColorVarId || null,
+        fillColor: fillEnabled ? (fillColorVarId ? null : hexToRgb(fillColorHex)) : null,
+        fillColorVariableId: fillEnabled && fillColorVarId ? fillColorVarId : null,
+        strokeThickness: strokeThickness,
+        cornerRadius: cornerRadius,
+        dropShadow: {
+          enabled: shadowEnabled,
+          x: shadowX,
+          y: shadowY,
+          blur: shadowBlur,
+          opacity: shadowOpacity,
+          color: shadowColor,
+          colorVariableId: shadowColorVarId || null
+        }
+      };
+    }
+    
+    // Update style settings when controls change
+    function updateStyleSettings() {
+      const settings = collectStyleSettings();
+      parent.postMessage({
+        pluginMessage: {
+          type: 'updateStyleSettings',
+          settings: settings
+        }
+      }, '*');
+    }
+    
+    // Initialize event handlers for style controls
+    function initializeStyleControls() {
+      // Stroke color
+      document.getElementById('strokeColorInput').addEventListener('input', (e) => {
+        // When custom color is selected, clear variable selection
+        document.getElementById('strokeColorVariableSelect').value = '';
+        updateStyleSettings();
+      });
+      
+      document.getElementById('strokeColorVariableSelect').addEventListener('change', (e) => {
+        updateStyleSettings();
+      });
+      
+      // Fill color
+      document.getElementById('fillColorInput').addEventListener('input', (e) => {
+        document.getElementById('fillColorVariableSelect').value = '';
+        updateStyleSettings();
+      });
+      
+      document.getElementById('fillColorVariableSelect').addEventListener('change', (e) => {
+        updateStyleSettings();
+      });
+      
+      document.getElementById('fillEnabledCheckbox').addEventListener('change', (e) => {
+        updateStyleSettings();
+      });
+      
+      // Stroke thickness
+      document.getElementById('strokeThicknessSlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        document.getElementById('strokeThicknessValue').textContent = value + 'px';
+        updateStyleSettings();
+      });
+      
+      // Corner radius
+      document.getElementById('cornerRadiusSlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        document.getElementById('cornerRadiusValue').textContent = value + 'px';
+        updateStyleSettings();
+      });
+      
+      // Drop shadow
+      document.getElementById('dropShadowEnabledCheckbox').addEventListener('change', (e) => {
+        toggleDropShadowControls(e.target.checked);
+        updateStyleSettings();
+      });
+      
+      document.getElementById('shadowXInput').addEventListener('input', updateStyleSettings);
+      document.getElementById('shadowYInput').addEventListener('input', updateStyleSettings);
+      document.getElementById('shadowBlurInput').addEventListener('input', updateStyleSettings);
+      
+      document.getElementById('shadowOpacitySlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        document.getElementById('shadowOpacityValue').textContent = Math.round(value * 100) + '%';
+        updateStyleSettings();
+      });
+      
+      document.getElementById('shadowColorInput').addEventListener('input', (e) => {
+        document.getElementById('shadowColorVariableSelect').value = '';
+        updateStyleSettings();
+      });
+      
+      document.getElementById('shadowColorVariableSelect').addEventListener('change', updateStyleSettings);
+      
+      // Refresh variables button
+      const refreshButton = document.getElementById('refreshVariablesButton');
+      if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
+          addLog('Refreshing color variables...', 'info');
+          parent.postMessage({
+            pluginMessage: {
+              type: 'getColorVariables'
+            }
+          }, '*');
+        });
+      }
+    }
+    
+    // Initialize
+    addLog('UI initialized', 'info');
+    initializeStyleControls();
+  </script>
+</body>
+</html>
+

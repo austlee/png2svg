@@ -1,0 +1,16 @@
+{
+  "name": "png-2-svg-tracer",
+  "version": "1.0.0",
+  "description": "Figma plugin to trace PNG edges",
+  "main": "code.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "png-js": "^1.0.0"
+  },
+  "devDependencies": {}
+}
+
+
