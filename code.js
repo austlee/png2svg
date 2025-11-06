@@ -1151,62 +1151,16 @@ async function createVectorPaths(paths, node, originalWidth, originalHeight, sca
     };
   });
   
-  // Build path data with optional rounded corners
-  const cornerRadius = styleSettings.cornerRadius || 0;
-  if (cornerRadius > 0) {
-    // Rounded corners using quadratic curves
-    // Start at first corner's start point (offset back by radius along previous edge)
-    const n = scaledPath.length;
-    for (let i = 0; i < n; i++) {
-      const prev = scaledPath[(i - 1 + n) % n];
-      const curr = scaledPath[i];
-      const next = scaledPath[(i + 1) % n];
-      
-      // Edge vectors
-      const v1x = curr.x - prev.x; const v1y = curr.y - prev.y;
-      const v2x = next.x - curr.x; const v2y = next.y - curr.y;
-      const len1 = Math.max(0.0001, Math.hypot(v1x, v1y));
-      const len2 = Math.max(0.0001, Math.hypot(v2x, v2y));
-      const r = Math.min(cornerRadius, 0.5 * len1, 0.5 * len2);
-      
-      // Points where curve starts/ends
-      const startX = curr.x - (v1x / len1) * r;
-      const startY = curr.y - (v1y / len1) * r;
-      const endX   = curr.x + (v2x / len2) * r;
-      const endY   = curr.y + (v2y / len2) * r;
-      
-      if (i === 0) {
-        pathData = `M ${startX} ${startY}`;
-      } else {
-        pathData += ` L ${startX} ${startY}`;
-      }
-      // Quadratic curve with control at the actual corner point
-      pathData += ` Q ${curr.x} ${curr.y} ${endX} ${endY}`;
-      
-      // On last iteration, close back to the start
-      if (i === n - 1) {
-        // Compute first corner's start to close precisely
-        const pPrev = scaledPath[n - 1];
-        const pCurr = scaledPath[0];
-        const pNext = scaledPath[1 % n];
-        const u1x = pCurr.x - pPrev.x; const u1y = pCurr.y - pPrev.y;
-        const u2x = pNext.x - pCurr.x; const u2y = pNext.y - pCurr.y;
-        const L1 = Math.max(0.0001, Math.hypot(u1x, u1y));
-        const L2 = Math.max(0.0001, Math.hypot(u2x, u2y));
-        const r0 = Math.min(cornerRadius, 0.5 * L1, 0.5 * L2);
-        const firstStartX = pCurr.x - (u1x / L1) * r0;
-        const firstStartY = pCurr.y - (u1y / L1) * r0;
-        pathData += ` L ${firstStartX} ${firstStartY} Z`;
-      }
-    }
-  } else {
-    // Straight edges
-    pathData = `M ${scaledPath[0].x} ${scaledPath[0].y}`;
-    for (let i = 1; i < scaledPath.length; i++) {
-      pathData += ` L ${scaledPath[i].x} ${scaledPath[i].y}`;
-    }
-    pathData += ` Z`;
+  // Build path data - simple straight lines (corner radius applied via property)
+  pathData = `M ${scaledPath[0].x} ${scaledPath[0].y}`;
+  
+  // Use lines to connect points
+  for (let i = 1; i < scaledPath.length; i++) {
+    pathData += ` L ${scaledPath[i].x} ${scaledPath[i].y}`;
   }
+  
+  // Close the path
+  pathData += ` Z`;
   
   // Set the path
   vectorPath.vectorPaths = [{
@@ -1263,6 +1217,12 @@ async function createVectorPaths(paths, node, originalWidth, originalHeight, sca
   
   // Size to match the actual traced shape size, not the full image
   vectorPath.resize(tracedShapeWidth, tracedShapeHeight);
+  
+  // Apply corner radius if specified
+  const cornerRadius = styleSettings.cornerRadius || 0;
+  if (cornerRadius > 0) {
+    vectorPath.cornerRadius = cornerRadius;
+  }
   
   // Add to parent
   parent.appendChild(vectorPath);
